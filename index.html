@@ -9,22 +9,21 @@
 
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background: #0f0f0f;
-      color: #e0e0e0;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 40px 16px;
+      background: #0f0f0f; color: #e0e0e0;
+      min-height: 100vh; display: flex;
+      flex-direction: column; align-items: center; padding: 40px 16px;
     }
 
     .container { width: 100%; max-width: 600px; }
 
     header { text-align: center; margin-bottom: 36px; }
     header h1 { font-size: 28px; font-weight: 700; color: #fff; margin-bottom: 6px; }
-    header p { font-size: 14px; color: #888; }
+    header p  { font-size: 14px; color: #888; }
 
-    .search-box { display: flex; gap: 8px; margin-bottom: 8px; }
+    /* ── Search box + dropdown ── */
+    .search-wrap { position: relative; margin-bottom: 8px; }
+
+    .search-box { display: flex; gap: 8px; }
     .search-box input {
       flex: 1; padding: 12px 16px; border-radius: 10px;
       border: 1px solid #2a2a2a; background: #1a1a1a;
@@ -32,18 +31,64 @@
       transition: border-color 0.2s;
     }
     .search-box input:focus { border-color: #e8573e; }
+    .search-box input.dropdown-open { border-radius: 10px 10px 0 0; border-bottom-color: #1a1a1a; }
     .search-box input::placeholder { color: #555; }
+
     .search-box button {
       padding: 12px 22px; border-radius: 10px;
-      background: #e8573e; border: none;
-      color: #fff; font-size: 15px; font-weight: 600;
-      cursor: pointer; transition: background 0.2s, transform 0.1s;
+      background: #e8573e; border: none; color: #fff;
+      font-size: 15px; font-weight: 600; cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
       white-space: nowrap; min-width: 110px;
     }
     .search-box button:hover { background: #d44d35; }
     .search-box button:active { transform: scale(0.97); }
     .search-box button:disabled { background: #444; cursor: not-allowed; transform: none; }
 
+    /* Dropdown */
+    .dropdown {
+      position: absolute;
+      top: 100%; left: 0;
+      /* width = input width (full width minus button width+gap) — set via JS */
+      background: #1a1a1a; border: 1px solid #2a2a2a; border-top: none;
+      border-radius: 0 0 10px 10px;
+      z-index: 100; overflow: hidden;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+      display: none;
+    }
+    .dropdown.visible { display: block; }
+
+    .dd-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 9px 12px; cursor: pointer;
+      transition: background 0.15s; border-bottom: 1px solid #222;
+    }
+    .dd-item:last-child { border-bottom: none; }
+    .dd-item:hover, .dd-item.focused { background: #242424; }
+
+    .dd-avatar {
+      width: 34px; height: 34px; border-radius: 50%;
+      background: #2a2a2a; flex-shrink: 0; overflow: hidden;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px; font-weight: 700; color: #666;
+    }
+    .dd-avatar img { width: 100%; height: 100%; object-fit: cover; }
+
+    .dd-info { flex: 1; min-width: 0; }
+    .dd-name { font-size: 14px; font-weight: 600; color: #fff; }
+    .dd-name em { color: #e8573e; font-style: normal; } /* highlight match */
+    .dd-sub  { font-size: 11px; color: #555; margin-top: 1px; }
+
+    .dd-searching {
+      padding: 12px; text-align: center;
+      font-size: 13px; color: #555;
+    }
+    .dd-no-result {
+      padding: 12px; text-align: center;
+      font-size: 13px; color: #555;
+    }
+
+    /* ── Cooldown bar ── */
     .cooldown-bar-wrap {
       height: 3px; background: #1a1a1a; border-radius: 2px;
       margin-bottom: 16px; overflow: hidden; display: none;
@@ -56,11 +101,11 @@
     .error-msg {
       background: #2a1a1a; border: 1px solid #5a2020;
       color: #f08080; padding: 10px 14px;
-      border-radius: 10px; font-size: 13px; margin-bottom: 16px;
-      display: none;
+      border-radius: 10px; font-size: 13px; margin-bottom: 16px; display: none;
     }
     .loading { text-align: center; color: #888; font-size: 14px; padding: 20px 0; display: none; }
 
+    /* ── Card ── */
     .card {
       background: #1a1a1a; border: 1px solid #2a2a2a;
       border-radius: 16px; padding: 24px;
@@ -73,16 +118,15 @@
       width: 84px; height: 84px; border-radius: 50%;
       background: #2a2a2a; overflow: hidden; flex-shrink: 0;
       display: flex; align-items: center; justify-content: center;
-      font-size: 32px; font-weight: 700; color: #888;
-      border: 2px solid #333;
+      font-size: 32px; font-weight: 700; color: #888; border: 2px solid #333;
     }
     .avatar img { width: 100%; height: 100%; object-fit: cover; }
 
     .profile-info { flex: 1; min-width: 0; }
-    .profile-info .display { font-size: 22px; font-weight: 700; color: #fff; }
+    .profile-info .display  { font-size: 22px; font-weight: 700; color: #fff; }
     .profile-info .username { font-size: 13px; color: #888; margin: 4px 0 8px; }
 
-    .badges { display: flex; gap: 6px; flex-wrap: wrap; }
+    .status-badges { display: flex; gap: 6px; flex-wrap: wrap; }
     .badge { font-size: 11px; padding: 3px 8px; border-radius: 20px; font-weight: 600; }
     .badge-verified { background: #1a3a5a; color: #60b0ff; }
     .badge-banned   { background: #3a1a1a; color: #ff6060; }
@@ -93,8 +137,7 @@
       white-space: pre-wrap; word-break: break-word;
       background: #141414; border-radius: 10px;
       padding: 12px 14px; margin-bottom: 4px;
-      border-left: 3px solid #e8573e;
-      display: none;
+      border-left: 3px solid #e8573e; display: none;
     }
 
     .section-title {
@@ -106,13 +149,11 @@
     .stats-grid { display: grid; gap: 10px; }
     .stats-grid.col3 { grid-template-columns: repeat(3, 1fr); }
 
-    .stat-card {
-      background: #141414; border-radius: 10px;
-      padding: 12px; text-align: center;
-    }
+    .stat-card { background: #141414; border-radius: 10px; padding: 12px; text-align: center; }
     .stat-card .label { font-size: 10px; color: #555; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.05em; }
     .stat-card .value { font-size: 16px; font-weight: 600; color: #fff; word-break: break-all; }
 
+    /* ── Tabs ── */
     .tabs { display: flex; gap: 2px; margin-top: 20px; border-bottom: 1px solid #222; }
     .tab-btn {
       padding: 8px 12px; font-size: 13px; font-weight: 500;
@@ -128,22 +169,15 @@
 
     .list-item {
       display: flex; align-items: center; justify-content: space-between;
-      padding: 9px 0; border-bottom: 1px solid #1e1e1e; font-size: 13px;
-      gap: 10px;
+      padding: 9px 0; border-bottom: 1px solid #1e1e1e; font-size: 13px; gap: 10px;
     }
     .list-item:last-child { border-bottom: none; }
     .list-item-info { flex: 1; min-width: 0; }
-    .list-item-name {
-      color: #ddd; font-weight: 500;
-      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-    }
-    .list-item-sub { font-size: 11px; color: #555; margin-top: 2px; }
+    .list-item-name { color: #ddd; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .list-item-sub  { font-size: 11px; color: #555; margin-top: 2px; }
     .list-item-right { color: #555; font-size: 12px; white-space: nowrap; text-align: right; }
 
-    .badge-grid {
-      display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
-      gap: 10px;
-    }
+    .badge-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(80px,1fr)); gap: 10px; }
     .badge-item {
       background: #141414; border-radius: 10px; padding: 10px 6px;
       text-align: center; transition: background 0.2s;
@@ -159,10 +193,7 @@
       -webkit-line-clamp: 2; -webkit-box-orient: vertical;
     }
 
-    .inv-grid {
-      display: grid; grid-template-columns: repeat(auto-fill, minmax(72px, 1fr));
-      gap: 8px;
-    }
+    .inv-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(72px,1fr)); gap: 8px; }
     .inv-item { background: #141414; border-radius: 8px; padding: 8px 4px; text-align: center; }
     .inv-item img {
       width: 52px; height: 52px; object-fit: contain;
@@ -190,332 +221,533 @@
     footer a:hover { color: #aaa; }
 
     @media (max-width: 420px) {
-      .stats-grid.col3 { grid-template-columns: repeat(2, 1fr); }
+      .stats-grid.col3 { grid-template-columns: repeat(2,1fr); }
+      .badge-grid { grid-template-columns: repeat(auto-fill, minmax(68px,1fr)); }
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <header>
-      <h1>🎮 Roblox Player Search</h1>
-      <p>Tìm kiếm thông tin người chơi Roblox</p>
-    </header>
+<div class="container">
+  <header>
+    <h1>🎮 Roblox Player Search</h1>
+    <p>Tìm kiếm thông tin người chơi Roblox</p>
+  </header>
 
+  <!-- Search -->
+  <div class="search-wrap">
     <div class="search-box">
-      <input type="text" id="search-input" placeholder="Nhập username hoặc User ID..." />
-      <button id="search-btn" onclick="searchPlayer()">Tìm kiếm</button>
-    </div>
-    <div class="cooldown-bar-wrap" id="cooldown-wrap">
-      <div class="cooldown-bar" id="cooldown-bar"></div>
-    </div>
-
-    <div class="error-msg" id="error-msg"></div>
-    <div class="loading" id="loading">Đang tìm kiếm...</div>
-
-    <div class="card" id="result-card">
-      <div class="profile-top">
-        <div class="avatar" id="avatar-wrap">?</div>
-        <div class="profile-info">
-          <div class="display" id="display-name"></div>
-          <div class="username" id="username-line"></div>
-          <div class="badges" id="status-badges"></div>
-        </div>
-      </div>
-
-      <div class="bio" id="bio-text"></div>
-
-      <div class="section-title">Thông tin cơ bản</div>
-      <div class="stats-grid col3">
-        <div class="stat-card"><div class="label">User ID</div><div class="value" id="stat-id">—</div></div>
-        <div class="stat-card"><div class="label">Tham gia</div><div class="value" id="stat-joined">—</div></div>
-        <div class="stat-card"><div class="label">Trạng thái</div><div class="value" id="stat-status">—</div></div>
-      </div>
-
-      <div class="section-title">Mạng xã hội</div>
-      <div class="stats-grid col3">
-        <div class="stat-card"><div class="label">Bạn bè</div><div class="value" id="stat-friends">...</div></div>
-        <div class="stat-card"><div class="label">Following</div><div class="value" id="stat-following">...</div></div>
-        <div class="stat-card"><div class="label">Followers</div><div class="value" id="stat-followers">...</div></div>
-      </div>
-
-      <div class="tabs">
-        <button class="tab-btn active" onclick="switchTab('games')">🎮 Games</button>
-        <button class="tab-btn" onclick="switchTab('places')">🗺️ Maps</button>
-        <button class="tab-btn" onclick="switchTab('badges')">🏅 Badges</button>
-        <button class="tab-btn" onclick="switchTab('inventory')">🎒 Inventory</button>
-      </div>
-
-      <div class="tab-content active" id="tab-games">
-        <div id="games-list"><div class="empty-note">Đang tải...</div></div>
-      </div>
-      <div class="tab-content" id="tab-places">
-        <div id="places-list"><div class="empty-note">Đang tải...</div></div>
-      </div>
-      <div class="tab-content" id="tab-badges">
-        <div id="badges-list"><div class="empty-note">Đang tải...</div></div>
-      </div>
-      <div class="tab-content" id="tab-inventory">
-        <div id="inventory-list"><div class="empty-note">Đang tải...</div></div>
-      </div>
-
-      <a class="profile-btn" id="profile-link" href="#" target="_blank">Xem profile trên Roblox ↗</a>
+      <input type="text" id="search-input"
+             placeholder="Nhập username hoặc User ID..."
+             autocomplete="off" />
+      <button id="search-btn" disabled>Tìm kiếm</button>
     </div>
 
-    <footer>
-      Powered by <a href="https://create.roblox.com/docs/cloud/legacy" target="_blank">Roblox API</a>
-      · Worker by <a href="https://workers.cloudflare.com" target="_blank">Cloudflare Workers</a>
-    </footer>
+    <!-- Autocomplete dropdown -->
+    <div class="dropdown" id="dropdown"></div>
   </div>
 
-  <script>
-    const WORKER = "https://gentle-hall-e65f.atnoob3034.workers.dev";
-    const COOLDOWN_MS = 2000;
-    let lastSearch = 0;
-    let cooldownTimer = null;
+  <div class="cooldown-bar-wrap" id="cooldown-wrap">
+    <div class="cooldown-bar" id="cooldown-bar"></div>
+  </div>
 
-    // ── HTTP helpers ──────────────────────────────────────
-    async function get(url) {
-      const res = await fetch(`${WORKER}?url=${encodeURIComponent(url)}`);
-      if (!res.ok) throw new Error("HTTP " + res.status);
-      return res.json();
-    }
-    async function post(url, body) {
-      const res = await fetch(`${WORKER}?url=${encodeURIComponent(url)}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
-      });
-      if (!res.ok) throw new Error("HTTP " + res.status);
-      return res.json();
+  <div class="error-msg" id="error-msg"></div>
+  <div class="loading"   id="loading">Đang tải thông tin...</div>
+
+  <!-- Result card -->
+  <div class="card" id="result-card">
+    <div class="profile-top">
+      <div class="avatar" id="avatar-wrap">?</div>
+      <div class="profile-info">
+        <div class="display"  id="display-name"></div>
+        <div class="username" id="username-line"></div>
+        <div class="status-badges" id="status-badges"></div>
+      </div>
+    </div>
+
+    <div class="bio" id="bio-text"></div>
+
+    <div class="section-title">Thông tin cơ bản</div>
+    <div class="stats-grid col3">
+      <div class="stat-card"><div class="label">User ID</div><div class="value" id="stat-id">—</div></div>
+      <div class="stat-card"><div class="label">Tham gia</div><div class="value" id="stat-joined">—</div></div>
+      <div class="stat-card"><div class="label">Trạng thái</div><div class="value" id="stat-status">—</div></div>
+    </div>
+
+    <div class="section-title">Mạng xã hội</div>
+    <div class="stats-grid col3">
+      <div class="stat-card"><div class="label">Bạn bè</div><div class="value" id="stat-friends">...</div></div>
+      <div class="stat-card"><div class="label">Following</div><div class="value" id="stat-following">...</div></div>
+      <div class="stat-card"><div class="label">Followers</div><div class="value" id="stat-followers">...</div></div>
+    </div>
+
+    <div class="tabs">
+      <button class="tab-btn active" onclick="switchTab('games')">🎮 Games</button>
+      <button class="tab-btn" onclick="switchTab('places')">🗺️ Maps</button>
+      <button class="tab-btn" onclick="switchTab('badges')">🏅 Badges</button>
+      <button class="tab-btn" onclick="switchTab('inventory')">🎒 Inventory</button>
+    </div>
+
+    <div class="tab-content active" id="tab-games">
+      <div id="games-list"><div class="empty-note">Đang tải...</div></div>
+    </div>
+    <div class="tab-content" id="tab-places">
+      <div id="places-list"><div class="empty-note">Đang tải...</div></div>
+    </div>
+    <div class="tab-content" id="tab-badges">
+      <div id="badges-list"><div class="empty-note">Đang tải...</div></div>
+    </div>
+    <div class="tab-content" id="tab-inventory">
+      <div id="inventory-list"><div class="empty-note">Đang tải...</div></div>
+    </div>
+
+    <a class="profile-btn" id="profile-link" href="#" target="_blank">Xem profile trên Roblox ↗</a>
+  </div>
+
+  <footer>
+    Powered by <a href="https://create.roblox.com/docs/cloud/legacy" target="_blank">Roblox API</a>
+    · Worker by <a href="https://workers.cloudflare.com" target="_blank">Cloudflare Workers</a>
+  </footer>
+</div>
+
+<script>
+  const WORKER      = "https://gentle-hall-e65f.atnoob3034.workers.dev";
+  const COOLDOWN_MS = 2000;
+  const DEBOUNCE_MS = 400; // ms chờ sau khi gõ xong trước khi gọi autocomplete
+
+  let lastSearch    = 0;
+  let cooldownTimer = null;
+  let debounceTimer = null;
+  let focusedIndex  = -1;       // keyboard nav trong dropdown
+  let selectedUser  = null;     // { id, name, displayName } được chọn từ dropdown
+  let currentQuery  = '';       // query đang autocomplete
+
+  // ── HTTP ────────────────────────────────────────────────
+  async function get(url) {
+    const res = await fetch(`${WORKER}?url=${encodeURIComponent(url)}`);
+    if (!res.ok) throw new Error("HTTP " + res.status);
+    return res.json();
+  }
+  async function post(url, body) {
+    const res = await fetch(`${WORKER}?url=${encodeURIComponent(url)}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+    if (!res.ok) throw new Error("HTTP " + res.status);
+    return res.json();
+  }
+
+  function fmt(n) { return typeof n === 'number' ? n.toLocaleString('vi-VN') : '—'; }
+  function esc(s) {
+    return String(s)
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+      .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  // Highlight phần khớp với query trong tên
+  function highlight(name, query) {
+    if (!query) return esc(name);
+    const idx = name.toLowerCase().indexOf(query.toLowerCase());
+    if (idx === -1) return esc(name);
+    return esc(name.slice(0,idx))
+      + `<em>${esc(name.slice(idx, idx+query.length))}</em>`
+      + esc(name.slice(idx+query.length));
+  }
+
+  // ── Dropdown width sync ─────────────────────────────────
+  function syncDropdownWidth() {
+    const inp = document.getElementById('search-input');
+    const dd  = document.getElementById('dropdown');
+    dd.style.width = inp.offsetWidth + 'px';
+  }
+  window.addEventListener('resize', syncDropdownWidth);
+
+  // ── Dropdown helpers ────────────────────────────────────
+  function showDropdown(html) {
+    syncDropdownWidth();
+    const dd = document.getElementById('dropdown');
+    dd.innerHTML = html;
+    dd.classList.add('visible');
+    document.getElementById('search-input').classList.add('dropdown-open');
+    focusedIndex = -1;
+  }
+  function hideDropdown() {
+    document.getElementById('dropdown').classList.remove('visible');
+    document.getElementById('dropdown').innerHTML = '';
+    document.getElementById('search-input').classList.remove('dropdown-open');
+    focusedIndex = -1;
+  }
+
+  // ── Autocomplete ────────────────────────────────────────
+  async function doAutocomplete(query) {
+    if (!query || query.length < 2) { hideDropdown(); return; }
+    currentQuery = query;
+
+    // Nếu là số → gợi ý tìm theo User ID
+    if (/^\d+$/.test(query)) {
+      showDropdown(`<div class="dd-item" onclick="loadById(${esc(query)})">
+        <div class="dd-avatar">#</div>
+        <div class="dd-info">
+          <div class="dd-name">User ID: <em>${esc(query)}</em></div>
+          <div class="dd-sub">Nhấn để tìm theo ID</div>
+        </div>
+      </div>`);
+      document.getElementById('search-btn').disabled = false;
+      return;
     }
 
-    function fmt(n) { return typeof n === 'number' ? n.toLocaleString('vi-VN') : '—'; }
-    function esc(s) {
-      return String(s)
-        .replace(/&/g,'&amp;').replace(/</g,'&lt;')
-        .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-    }
+    showDropdown('<div class="dd-searching">Đang tìm...</div>');
+    document.getElementById('search-btn').disabled = true;
 
-    // ── Cooldown ──────────────────────────────────────────
-    function startCooldown() {
-      const wrap = document.getElementById('cooldown-wrap');
-      const bar  = document.getElementById('cooldown-bar');
-      const btn  = document.getElementById('search-btn');
-      wrap.style.display = 'block';
-      bar.style.transition = 'none';
-      bar.style.width = '100%';
-      bar.getBoundingClientRect(); // force reflow
-      bar.style.transition = `width ${COOLDOWN_MS}ms linear`;
-      bar.style.width = '0%';
-      btn.disabled = true;
-      btn.textContent = 'Chờ 2s...';
-      clearTimeout(cooldownTimer);
-      cooldownTimer = setTimeout(() => {
-        btn.disabled = false;
-        btn.textContent = 'Tìm kiếm';
-        wrap.style.display = 'none';
-      }, COOLDOWN_MS);
-    }
+    try {
+      // Dùng search endpoint để lấy danh sách gợi ý (chấp nhận 429 nếu có, chỉ cho autocomplete)
+      const data = await get(
+        `https://users.roblox.com/v1/users/search?keyword=${encodeURIComponent(query)}&limit=10`
+      );
 
-    // ── Tabs ──────────────────────────────────────────────
-    const TAB_NAMES = ['games','places','badges','inventory'];
-    function switchTab(name) {
-      document.querySelectorAll('.tab-btn').forEach((b, i) =>
-        b.classList.toggle('active', TAB_NAMES[i] === name));
-      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-      document.getElementById('tab-' + name).classList.add('active');
-    }
+      // Guard: nếu query đã đổi trong lúc chờ thì bỏ qua
+      if (currentQuery !== query) return;
 
-    // ── Search ────────────────────────────────────────────
-    async function searchPlayer() {
-      const now = Date.now();
-      if (now - lastSearch < COOLDOWN_MS) {
-        const wait = Math.ceil((COOLDOWN_MS - (now - lastSearch)) / 1000);
-        setError(`Vui lòng chờ ${wait}s trước khi tìm tiếp.`);
+      const list = data?.data;
+      if (!list?.length) {
+        showDropdown('<div class="dd-no-result">Không tìm thấy kết quả nào</div>');
         return;
       }
 
-      const input = document.getElementById('search-input').value.trim();
-      if (!input) return;
-
-      lastSearch = now;
-      startCooldown();
-      setError('');
-      setLoading(true);
-      document.getElementById('result-card').style.display = 'none';
-      resetTabs();
-
+      // Lấy avatar hàng loạt
+      const ids = list.map(u => u.id).join(',');
+      let avatarMap = {};
       try {
-        let userId;
+        const avRes = await get(
+          `https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${ids}&size=48x48&format=Png`
+        );
+        avRes?.data?.forEach(a => { avatarMap[a.targetId] = a.imageUrl; });
+      } catch {}
 
-        if (/^\d+$/.test(input)) {
-          userId = input;
-        } else {
-          // ✅ POST /v1/usernames/users — ít bị rate limit hơn GET /v1/users/search
-          const data = await post('https://users.roblox.com/v1/usernames/users',
-            { usernames: [input], excludeBannedUsers: false });
-          const match = data?.data?.[0];
-          if (!match) { setError(`Không tìm thấy username "${esc(input)}". Thử nhập User ID.`); return; }
-          userId = match.id;
-        }
+      if (currentQuery !== query) return;
 
-        const user = await get(`https://users.roblox.com/v1/users/${userId}`);
-        if (!user || user.errors?.length) { setError('Không tìm thấy user ID: ' + userId); return; }
+      const items = list.map((u, i) => {
+        const av = avatarMap[u.id]
+          ? `<img src="${esc(avatarMap[u.id])}" alt="" loading="lazy" onerror="this.parentElement.textContent='${esc((u.name||'?')[0].toUpperCase())}'" />`
+          : (u.name||'?')[0].toUpperCase();
+        const displayPart = u.displayName && u.displayName !== u.name
+          ? `<span style="color:#666;font-weight:400"> · ${esc(u.displayName)}</span>` : '';
+        return `<div class="dd-item" data-index="${i}"
+                     onclick="selectUser(${u.id}, '${esc(u.name)}', '${esc(u.displayName||u.name)}')">
+          <div class="dd-avatar">${av}</div>
+          <div class="dd-info">
+            <div class="dd-name">${highlight(u.name, query)}${displayPart}</div>
+            <div class="dd-sub">ID: ${u.id}</div>
+          </div>
+        </div>`;
+      }).join('');
 
-        let avatarUrl = null;
-        try {
-          const av = await get(`https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${userId}&size=150x150&format=Png`);
-          avatarUrl = av?.data?.[0]?.imageUrl;
-        } catch {}
+      showDropdown(items);
 
-        showProfile(user, avatarUrl);
+    } catch (e) {
+      if (currentQuery !== query) return;
+      // Nếu rate limited → vẫn cho phép tìm chính xác bằng nút
+      showDropdown(`<div class="dd-no-result">Không thể tải gợi ý (${e.message})<br><small style="color:#444">Nhấn "Tìm kiếm" để tìm chính xác</small></div>`);
+      document.getElementById('search-btn').disabled = false;
+    }
+  }
 
-        // Tải song song
-        Promise.allSettled([
-          get(`https://friends.roblox.com/v1/users/${userId}/friends/count`),
-          get(`https://friends.roblox.com/v1/users/${userId}/followings/count`),
-          get(`https://friends.roblox.com/v1/users/${userId}/followers/count`),
-          get(`https://www.roblox.com/users/profile/playergames-json?userId=${userId}`),
-          get(`https://inventory.roblox.com/v1/users/${userId}/places/inventory?cursor=&itemsPerPage=10&placesTab=Created`),
-          get(`https://badges.roblox.com/v1/users/${userId}/badges?limit=24&sortOrder=Desc`),
-          get(`https://inventory.roblox.com/v1/users/${userId}/assets/collectibles?limit=24&sortOrder=Desc`),
-        ]).then(([friends, following, followers, games, places, badges, inventory]) => {
-          document.getElementById('stat-friends').textContent   = fmt(friends.value?.count);
-          document.getElementById('stat-following').textContent = fmt(following.value?.count);
-          document.getElementById('stat-followers').textContent = fmt(followers.value?.count);
-          renderGames(games);
-          renderPlaces(places);
-          renderBadges(badges);
-          renderInventory(inventory);
-        });
+  // Chọn user từ dropdown → load ngay
+  function selectUser(id, name, displayName) {
+    selectedUser = { id, name, displayName };
+    document.getElementById('search-input').value = name;
+    hideDropdown();
+    loadProfile(id);
+  }
 
-      } catch (e) {
-        setError('Lỗi kết nối: ' + e.message);
+  // Tìm theo ID thuần
+  function loadById(id) {
+    selectedUser = { id, name: '#'+id, displayName: '' };
+    hideDropdown();
+    loadProfile(id);
+  }
+
+  // ── Cooldown ────────────────────────────────────────────
+  function startCooldown() {
+    const wrap = document.getElementById('cooldown-wrap');
+    const bar  = document.getElementById('cooldown-bar');
+    const btn  = document.getElementById('search-btn');
+    wrap.style.display = 'block';
+    bar.style.transition = 'none';
+    bar.style.width = '100%';
+    bar.getBoundingClientRect();
+    bar.style.transition = `width ${COOLDOWN_MS}ms linear`;
+    bar.style.width = '0%';
+    btn.disabled = true;
+    btn.textContent = 'Chờ 2s...';
+    clearTimeout(cooldownTimer);
+    cooldownTimer = setTimeout(() => {
+      btn.disabled = false;
+      btn.textContent = 'Tìm kiếm';
+      wrap.style.display = 'none';
+    }, COOLDOWN_MS);
+  }
+
+  // ── Keyboard navigation ─────────────────────────────────
+  document.getElementById('search-input').addEventListener('keydown', e => {
+    const dd    = document.getElementById('dropdown');
+    const items = dd.querySelectorAll('.dd-item');
+
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      focusedIndex = Math.min(focusedIndex + 1, items.length - 1);
+      updateFocus(items);
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      focusedIndex = Math.max(focusedIndex - 1, 0);
+      updateFocus(items);
+    } else if (e.key === 'Enter') {
+      if (focusedIndex >= 0 && items[focusedIndex]) {
+        items[focusedIndex].click();
+      } else {
+        // Không có gì được focus → tìm chính xác bằng nút
+        onSearchBtn();
+      }
+    } else if (e.key === 'Escape') {
+      hideDropdown();
+    }
+  });
+
+  function updateFocus(items) {
+    items.forEach((el, i) => el.classList.toggle('focused', i === focusedIndex));
+    if (items[focusedIndex]) items[focusedIndex].scrollIntoView({ block: 'nearest' });
+  }
+
+  // ── Input event → debounce autocomplete ────────────────
+  document.getElementById('search-input').addEventListener('input', e => {
+    const val = e.target.value.trim();
+    selectedUser = null;
+    document.getElementById('search-btn').disabled = true;
+    clearTimeout(debounceTimer);
+    if (!val) { hideDropdown(); return; }
+    debounceTimer = setTimeout(() => doAutocomplete(val), DEBOUNCE_MS);
+  });
+
+  // Close dropdown khi click ngoài
+  document.addEventListener('mousedown', e => {
+    const wrap = document.querySelector('.search-wrap');
+    if (!wrap.contains(e.target)) hideDropdown();
+  });
+
+  // ── Nút Tìm kiếm (fallback nếu không chọn dropdown) ───
+  document.getElementById('search-btn').addEventListener('click', onSearchBtn);
+
+  async function onSearchBtn() {
+    const input = document.getElementById('search-input').value.trim();
+    if (!input) return;
+
+    hideDropdown();
+
+    if (selectedUser) {
+      // Đã chọn từ dropdown → load luôn
+      loadProfile(selectedUser.id);
+      return;
+    }
+
+    // Chưa chọn → resolve username → load
+    const now = Date.now();
+    if (now - lastSearch < COOLDOWN_MS) {
+      setError(`Vui lòng chờ ${Math.ceil((COOLDOWN_MS-(now-lastSearch))/1000)}s.`);
+      return;
+    }
+
+    if (/^\d+$/.test(input)) {
+      loadProfile(input);
+    } else {
+      setLoading(true);
+      try {
+        const data = await post('https://users.roblox.com/v1/usernames/users',
+          { usernames: [input], excludeBannedUsers: false });
+        const match = data?.data?.[0];
+        if (!match) { setError(`Không tìm thấy username "${esc(input)}".`); return; }
+        loadProfile(match.id);
+      } catch(e) {
+        setError('Lỗi: ' + e.message);
       } finally {
         setLoading(false);
       }
     }
+  }
 
-    // ── Render helpers ────────────────────────────────────
-    function showProfile(user, avatarUrl) {
-      document.getElementById('display-name').textContent = user.displayName || user.name;
-      document.getElementById('username-line').textContent = '@' + user.name + ' · ID: ' + user.id;
-      document.getElementById('stat-id').textContent = '#' + user.id;
-
-      const bio = user.description?.trim();
-      const bioEl = document.getElementById('bio-text');
-      if (bio) { bioEl.textContent = bio; bioEl.style.display = 'block'; }
-      else bioEl.style.display = 'none';
-
-      document.getElementById('stat-joined').textContent = user.created
-        ? new Date(user.created).toLocaleDateString('vi-VN', {year:'numeric',month:'short',day:'numeric'}) : '—';
-
-      const statusEl = document.getElementById('stat-status');
-      statusEl.textContent = user.isBanned ? 'Bị ban' : 'Bình thường';
-      statusEl.style.color = user.isBanned ? '#ff6060' : '#60d060';
-
-      const sb = document.getElementById('status-badges');
-      sb.innerHTML = '';
-      if (user.hasVerifiedBadge) sb.innerHTML += `<span class="badge badge-verified">✓ Đã xác thực</span>`;
-      sb.innerHTML += user.isBanned
-        ? `<span class="badge badge-banned">🔴 Bị ban</span>`
-        : `<span class="badge badge-active">🟢 Hoạt động</span>`;
-
-      const initial = (user.name||'?')[0].toUpperCase();
-      const aw = document.getElementById('avatar-wrap');
-      if (avatarUrl) {
-        aw.innerHTML = `<img src="${esc(avatarUrl)}" alt="avatar" onerror="this.parentElement.textContent='${esc(initial)}'" />`;
-      } else aw.textContent = initial;
-
-      document.getElementById('profile-link').href = `https://www.roblox.com/users/${user.id}/profile`;
-      ['friends','following','followers'].forEach(k => document.getElementById('stat-'+k).textContent = '...');
-      document.getElementById('result-card').style.display = 'block';
+  // ── Load profile ────────────────────────────────────────
+  async function loadProfile(userId) {
+    const now = Date.now();
+    if (now - lastSearch < COOLDOWN_MS) {
+      setError(`Vui lòng chờ ${Math.ceil((COOLDOWN_MS-(now-lastSearch))/1000)}s.`);
+      return;
     }
+    lastSearch = now;
+    startCooldown();
+    setError('');
+    setLoading(true);
+    document.getElementById('result-card').style.display = 'none';
+    resetTabs();
 
-    function renderGames(r) {
-      const el = document.getElementById('games-list');
-      if (r.status !== 'fulfilled') { el.innerHTML = '<div class="empty-note">Không thể tải games.</div>'; return; }
-      const list = r.value?.Games;
-      if (!list?.length) { el.innerHTML = '<div class="empty-note">Chưa có games công khai.</div>'; return; }
-      el.innerHTML = list.slice(0,8).map(g => `
-        <div class="list-item">
-          <div class="list-item-info">
-            <div class="list-item-name">${esc(g.Name)}</div>
-            <div class="list-item-sub">👍 ${fmt(g.TotalUpVotes)} · ❤️ ${fmt(g.Favorites)}</div>
-          </div>
-          <div class="list-item-right">${fmt(g.Plays)} lượt</div>
-        </div>`).join('');
-    }
+    try {
+      const user = await get(`https://users.roblox.com/v1/users/${userId}`);
+      if (!user || user.errors?.length) { setError('Không tìm thấy user ID: ' + userId); return; }
 
-    function renderPlaces(r) {
-      const el = document.getElementById('places-list');
-      if (r.status !== 'fulfilled') { el.innerHTML = '<div class="empty-note">Không thể tải maps.</div>'; return; }
-      const list = r.value?.data;
-      if (!list?.length) { el.innerHTML = '<div class="empty-note">Chưa tạo map nào hoặc inventory riêng tư.</div>'; return; }
-      el.innerHTML = list.slice(0,10).map(p => `
-        <div class="list-item">
-          <div class="list-item-info">
-            <div class="list-item-name">${esc(p.name || 'Không tên')}</div>
-            <div class="list-item-sub">Place ID: ${p.placeId || p.id || '—'}</div>
-          </div>
-          <div class="list-item-right">
-            <a href="https://www.roblox.com/games/${p.placeId||p.id}" target="_blank"
-               style="color:#e8573e;text-decoration:none">Mở ↗</a>
-          </div>
-        </div>`).join('');
-    }
+      let avatarUrl = null;
+      try {
+        const av = await get(`https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${userId}&size=150x150&format=Png`);
+        avatarUrl = av?.data?.[0]?.imageUrl;
+      } catch {}
 
-    function renderBadges(r) {
-      const el = document.getElementById('badges-list');
-      if (r.status !== 'fulfilled') { el.innerHTML = '<div class="empty-note">Không thể tải badges.</div>'; return; }
-      const list = r.value?.data;
-      if (!list?.length) { el.innerHTML = '<div class="empty-note">Chưa có badge nào.</div>'; return; }
-      el.innerHTML =
-        `<div class="badge-grid">` +
-        list.map(b => `
-          <div class="badge-item" title="${esc(b.name)}">
-            <img src="${esc(b.displayIconImageUrl||'')}" alt="${esc(b.name)}" loading="lazy"
-                 onerror="this.style.opacity='0'" />
-            <div class="badge-name">${esc(b.name)}</div>
-          </div>`).join('') +
-        `</div><div class="tab-footer">Hiển thị ${list.length} badge gần nhất</div>`;
-    }
+      showProfile(user, avatarUrl);
 
-    function renderInventory(r) {
-      const el = document.getElementById('inventory-list');
-      if (r.status !== 'fulfilled') {
-        el.innerHTML = '<div class="empty-note">Inventory riêng tư hoặc không thể tải.</div>';
-        return;
-      }
-      const list = r.value?.data;
-      if (!list?.length) { el.innerHTML = '<div class="empty-note">Không có collectibles hoặc inventory riêng tư.</div>'; return; }
-      el.innerHTML =
-        `<div class="inv-grid">` +
-        list.map(item => `
-          <div class="inv-item" title="${esc(item.name)}">
-            <img src="https://www.roblox.com/Thumbs/Asset.ashx?assetId=${item.assetId}&x=60&y=60"
-                 alt="${esc(item.name)}" loading="lazy" onerror="this.style.display='none'" />
-            <div class="inv-name">${esc(item.name)}</div>
-          </div>`).join('') +
-        `</div><div class="tab-footer">Hiển thị ${list.length} collectibles</div>`;
-    }
+      Promise.allSettled([
+        get(`https://friends.roblox.com/v1/users/${userId}/friends/count`),
+        get(`https://friends.roblox.com/v1/users/${userId}/followings/count`),
+        get(`https://friends.roblox.com/v1/users/${userId}/followers/count`),
+        get(`https://www.roblox.com/users/profile/playergames-json?userId=${userId}`),
+        get(`https://inventory.roblox.com/v1/users/${userId}/places/inventory?cursor=&itemsPerPage=10&placesTab=Created`),
+        get(`https://badges.roblox.com/v1/users/${userId}/badges?limit=24&sortOrder=Desc`),
+        get(`https://inventory.roblox.com/v1/users/${userId}/assets/collectibles?limit=24&sortOrder=Desc`),
+      ]).then(([friends, following, followers, games, places, badges, inventory]) => {
+        document.getElementById('stat-friends').textContent   = fmt(friends.value?.count);
+        document.getElementById('stat-following').textContent = fmt(following.value?.count);
+        document.getElementById('stat-followers').textContent = fmt(followers.value?.count);
+        renderGames(games);
+        renderPlaces(places);
+        renderBadges(badges);
+        renderInventory(inventory);
+      });
 
-    function resetTabs() {
-      ['games','places','badges','inventory'].forEach(t =>
-        document.getElementById(t+'-list').innerHTML = '<div class="empty-note">Đang tải...</div>');
-      switchTab('games');
+    } catch (e) {
+      setError('Lỗi kết nối: ' + e.message);
+    } finally {
+      setLoading(false);
     }
-    function setError(msg) {
-      const el = document.getElementById('error-msg');
-      el.textContent = msg; el.style.display = msg ? 'block' : 'none';
-    }
-    function setLoading(v) {
-      document.getElementById('loading').style.display = v ? 'block' : 'none';
-    }
+  }
 
-    document.getElementById('search-input').addEventListener('keydown', e => {
-      if (e.key === 'Enter') searchPlayer();
-    });
-  </script>
+  // ── Render profile ──────────────────────────────────────
+  function showProfile(user, avatarUrl) {
+    document.getElementById('display-name').textContent = user.displayName || user.name;
+    document.getElementById('username-line').textContent = '@' + user.name + ' · ID: ' + user.id;
+    document.getElementById('stat-id').textContent = '#' + user.id;
+
+    const bio = user.description?.trim();
+    const bioEl = document.getElementById('bio-text');
+    if (bio) { bioEl.textContent = bio; bioEl.style.display = 'block'; }
+    else bioEl.style.display = 'none';
+
+    document.getElementById('stat-joined').textContent = user.created
+      ? new Date(user.created).toLocaleDateString('vi-VN',{year:'numeric',month:'short',day:'numeric'}) : '—';
+
+    const statusEl = document.getElementById('stat-status');
+    statusEl.textContent = user.isBanned ? 'Bị ban' : 'Bình thường';
+    statusEl.style.color = user.isBanned ? '#ff6060' : '#60d060';
+
+    const sb = document.getElementById('status-badges');
+    sb.innerHTML = '';
+    if (user.hasVerifiedBadge) sb.innerHTML += `<span class="badge badge-verified">✓ Đã xác thực</span>`;
+    sb.innerHTML += user.isBanned
+      ? `<span class="badge badge-banned">🔴 Bị ban</span>`
+      : `<span class="badge badge-active">🟢 Hoạt động</span>`;
+
+    const initial = (user.name||'?')[0].toUpperCase();
+    const aw = document.getElementById('avatar-wrap');
+    if (avatarUrl) {
+      aw.innerHTML = `<img src="${esc(avatarUrl)}" alt="avatar" onerror="this.parentElement.textContent='${esc(initial)}'" />`;
+    } else aw.textContent = initial;
+
+    document.getElementById('profile-link').href = `https://www.roblox.com/users/${user.id}/profile`;
+    ['friends','following','followers'].forEach(k =>
+      document.getElementById('stat-'+k).textContent = '...');
+    document.getElementById('result-card').style.display = 'block';
+  }
+
+  // ── Render tabs ─────────────────────────────────────────
+  function renderGames(r) {
+    const el = document.getElementById('games-list');
+    if (r.status !== 'fulfilled') { el.innerHTML = '<div class="empty-note">Không thể tải games.</div>'; return; }
+    const list = r.value?.Games;
+    if (!list?.length) { el.innerHTML = '<div class="empty-note">Chưa có games công khai.</div>'; return; }
+    el.innerHTML = list.slice(0,8).map(g => `
+      <div class="list-item">
+        <div class="list-item-info">
+          <div class="list-item-name">${esc(g.Name)}</div>
+          <div class="list-item-sub">👍 ${fmt(g.TotalUpVotes)} · ❤️ ${fmt(g.Favorites)}</div>
+        </div>
+        <div class="list-item-right">${fmt(g.Plays)} lượt</div>
+      </div>`).join('');
+  }
+
+  function renderPlaces(r) {
+    const el = document.getElementById('places-list');
+    if (r.status !== 'fulfilled') { el.innerHTML = '<div class="empty-note">Không thể tải maps.</div>'; return; }
+    const list = r.value?.data;
+    if (!list?.length) { el.innerHTML = '<div class="empty-note">Chưa tạo map nào hoặc inventory riêng tư.</div>'; return; }
+    el.innerHTML = list.slice(0,10).map(p => `
+      <div class="list-item">
+        <div class="list-item-info">
+          <div class="list-item-name">${esc(p.name||'Không tên')}</div>
+          <div class="list-item-sub">Place ID: ${p.placeId||p.id||'—'}</div>
+        </div>
+        <div class="list-item-right">
+          <a href="https://www.roblox.com/games/${p.placeId||p.id}" target="_blank"
+             style="color:#e8573e;text-decoration:none">Mở ↗</a>
+        </div>
+      </div>`).join('');
+  }
+
+  function renderBadges(r) {
+    const el = document.getElementById('badges-list');
+    if (r.status !== 'fulfilled') { el.innerHTML = '<div class="empty-note">Không thể tải badges.</div>'; return; }
+    const list = r.value?.data;
+    if (!list?.length) { el.innerHTML = '<div class="empty-note">Chưa có badge nào.</div>'; return; }
+    el.innerHTML = `<div class="badge-grid">`
+      + list.map(b => `
+        <div class="badge-item" title="${esc(b.name)}">
+          <img src="${esc(b.displayIconImageUrl||'')}" alt="${esc(b.name)}" loading="lazy"
+               onerror="this.style.opacity='0'" />
+          <div class="badge-name">${esc(b.name)}</div>
+        </div>`).join('')
+      + `</div><div class="tab-footer">Hiển thị ${list.length} badge gần nhất</div>`;
+  }
+
+  function renderInventory(r) {
+    const el = document.getElementById('inventory-list');
+    if (r.status !== 'fulfilled') {
+      el.innerHTML = '<div class="empty-note">Inventory riêng tư hoặc không thể tải.</div>'; return;
+    }
+    const list = r.value?.data;
+    if (!list?.length) { el.innerHTML = '<div class="empty-note">Không có collectibles hoặc inventory riêng tư.</div>'; return; }
+    el.innerHTML = `<div class="inv-grid">`
+      + list.map(item => `
+        <div class="inv-item" title="${esc(item.name)}">
+          <img src="https://www.roblox.com/Thumbs/Asset.ashx?assetId=${item.assetId}&x=60&y=60"
+               alt="${esc(item.name)}" loading="lazy" onerror="this.style.display='none'" />
+          <div class="inv-name">${esc(item.name)}</div>
+        </div>`).join('')
+      + `</div><div class="tab-footer">Hiển thị ${list.length} collectibles</div>`;
+  }
+
+  // ── Misc ─────────────────────────────────────────────────
+  const TAB_NAMES = ['games','places','badges','inventory'];
+  function switchTab(name) {
+    document.querySelectorAll('.tab-btn').forEach((b,i) =>
+      b.classList.toggle('active', TAB_NAMES[i] === name));
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+    document.getElementById('tab-'+name).classList.add('active');
+  }
+  function resetTabs() {
+    ['games','places','badges','inventory'].forEach(t =>
+      document.getElementById(t+'-list').innerHTML = '<div class="empty-note">Đang tải...</div>');
+    switchTab('games');
+  }
+  function setError(msg) {
+    const el = document.getElementById('error-msg');
+    el.textContent = msg; el.style.display = msg ? 'block' : 'none';
+  }
+  function setLoading(v) {
+    document.getElementById('loading').style.display = v ? 'block' : 'none';
+  }
+</script>
 </body>
 </html>
