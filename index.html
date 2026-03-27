@@ -18,13 +18,13 @@
       padding: 40px 16px;
     }
 
-    .container { width: 100%; max-width: 580px; }
+    .container { width: 100%; max-width: 600px; }
 
     header { text-align: center; margin-bottom: 36px; }
     header h1 { font-size: 28px; font-weight: 700; color: #fff; margin-bottom: 6px; }
     header p { font-size: 14px; color: #888; }
 
-    .search-box { display: flex; gap: 8px; margin-bottom: 20px; }
+    .search-box { display: flex; gap: 8px; margin-bottom: 8px; }
     .search-box input {
       flex: 1; padding: 12px 16px; border-radius: 10px;
       border: 1px solid #2a2a2a; background: #1a1a1a;
@@ -38,11 +38,20 @@
       background: #e8573e; border: none;
       color: #fff; font-size: 15px; font-weight: 600;
       cursor: pointer; transition: background 0.2s, transform 0.1s;
-      white-space: nowrap;
+      white-space: nowrap; min-width: 110px;
     }
     .search-box button:hover { background: #d44d35; }
     .search-box button:active { transform: scale(0.97); }
-    .search-box button:disabled { background: #555; cursor: not-allowed; transform: none; }
+    .search-box button:disabled { background: #444; cursor: not-allowed; transform: none; }
+
+    .cooldown-bar-wrap {
+      height: 3px; background: #1a1a1a; border-radius: 2px;
+      margin-bottom: 16px; overflow: hidden; display: none;
+    }
+    .cooldown-bar {
+      height: 100%; background: #e8573e; border-radius: 2px;
+      width: 100%; transition: width 0.1s linear;
+    }
 
     .error-msg {
       background: #2a1a1a; border: 1px solid #5a2020;
@@ -61,7 +70,7 @@
 
     .profile-top { display: flex; align-items: center; gap: 16px; margin-bottom: 20px; }
     .avatar {
-      width: 80px; height: 80px; border-radius: 50%;
+      width: 84px; height: 84px; border-radius: 50%;
       background: #2a2a2a; overflow: hidden; flex-shrink: 0;
       display: flex; align-items: center; justify-content: center;
       font-size: 32px; font-weight: 700; color: #888;
@@ -83,7 +92,7 @@
       font-size: 13px; color: #aaa; line-height: 1.6;
       white-space: pre-wrap; word-break: break-word;
       background: #141414; border-radius: 10px;
-      padding: 12px 14px; margin-bottom: 20px;
+      padding: 12px 14px; margin-bottom: 4px;
       border-left: 3px solid #e8573e;
       display: none;
     }
@@ -94,18 +103,79 @@
       margin-bottom: 10px; margin-top: 20px;
     }
 
-    .stats-grid {
-      display: grid; gap: 10px; margin-bottom: 4px;
-    }
+    .stats-grid { display: grid; gap: 10px; }
     .stats-grid.col3 { grid-template-columns: repeat(3, 1fr); }
-    .stats-grid.col2 { grid-template-columns: repeat(2, 1fr); }
 
     .stat-card {
       background: #141414; border-radius: 10px;
       padding: 12px; text-align: center;
     }
     .stat-card .label { font-size: 10px; color: #555; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.05em; }
-    .stat-card .value { font-size: 16px; font-weight: 600; color: #fff; }
+    .stat-card .value { font-size: 16px; font-weight: 600; color: #fff; word-break: break-all; }
+
+    .tabs { display: flex; gap: 2px; margin-top: 20px; border-bottom: 1px solid #222; }
+    .tab-btn {
+      padding: 8px 12px; font-size: 13px; font-weight: 500;
+      color: #666; background: none; border: none; cursor: pointer;
+      border-bottom: 2px solid transparent; margin-bottom: -1px;
+      transition: color 0.2s, border-color 0.2s;
+    }
+    .tab-btn:hover { color: #aaa; }
+    .tab-btn.active { color: #e8573e; border-bottom-color: #e8573e; }
+
+    .tab-content { display: none; padding-top: 14px; }
+    .tab-content.active { display: block; }
+
+    .list-item {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 9px 0; border-bottom: 1px solid #1e1e1e; font-size: 13px;
+      gap: 10px;
+    }
+    .list-item:last-child { border-bottom: none; }
+    .list-item-info { flex: 1; min-width: 0; }
+    .list-item-name {
+      color: #ddd; font-weight: 500;
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+    .list-item-sub { font-size: 11px; color: #555; margin-top: 2px; }
+    .list-item-right { color: #555; font-size: 12px; white-space: nowrap; text-align: right; }
+
+    .badge-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+      gap: 10px;
+    }
+    .badge-item {
+      background: #141414; border-radius: 10px; padding: 10px 6px;
+      text-align: center; transition: background 0.2s;
+    }
+    .badge-item:hover { background: #1e1e1e; }
+    .badge-item img {
+      width: 48px; height: 48px; object-fit: contain; border-radius: 6px;
+      display: block; margin: 0 auto 6px; background: #222;
+    }
+    .badge-item .badge-name {
+      font-size: 10px; color: #888; line-height: 1.3;
+      overflow: hidden; display: -webkit-box;
+      -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+    }
+
+    .inv-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(72px, 1fr));
+      gap: 8px;
+    }
+    .inv-item { background: #141414; border-radius: 8px; padding: 8px 4px; text-align: center; }
+    .inv-item img {
+      width: 52px; height: 52px; object-fit: contain;
+      display: block; margin: 0 auto 4px; border-radius: 4px; background: #222;
+    }
+    .inv-item .inv-name {
+      font-size: 9px; color: #777; line-height: 1.3;
+      overflow: hidden; display: -webkit-box;
+      -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+    }
+
+    .empty-note { color: #555; font-size: 13px; text-align: center; padding: 20px 0; }
+    .tab-footer { font-size: 11px; color: #444; text-align: right; margin-top: 8px; }
 
     .profile-btn {
       display: block; text-align: center; padding: 10px;
@@ -115,20 +185,11 @@
     }
     .profile-btn:hover { background: #2a2a2a; color: #fff; }
 
-    .games-section { display: none; }
-    .game-item {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 10px 0; border-bottom: 1px solid #222; font-size: 13px;
-    }
-    .game-item:last-child { border-bottom: none; }
-    .game-name { color: #ddd; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; }
-    .game-plays { color: #666; font-size: 12px; white-space: nowrap; margin-left: 12px; }
-
     footer { margin-top: 40px; text-align: center; font-size: 12px; color: #444; }
     footer a { color: #666; text-decoration: none; }
     footer a:hover { color: #aaa; }
 
-    @media (max-width: 400px) {
+    @media (max-width: 420px) {
       .stats-grid.col3 { grid-template-columns: repeat(2, 1fr); }
     }
   </style>
@@ -144,6 +205,9 @@
       <input type="text" id="search-input" placeholder="Nhập username hoặc User ID..." />
       <button id="search-btn" onclick="searchPlayer()">Tìm kiếm</button>
     </div>
+    <div class="cooldown-bar-wrap" id="cooldown-wrap">
+      <div class="cooldown-bar" id="cooldown-bar"></div>
+    </div>
 
     <div class="error-msg" id="error-msg"></div>
     <div class="loading" id="loading">Đang tìm kiếm...</div>
@@ -154,7 +218,7 @@
         <div class="profile-info">
           <div class="display" id="display-name"></div>
           <div class="username" id="username-line"></div>
-          <div class="badges" id="badges"></div>
+          <div class="badges" id="status-badges"></div>
         </div>
       </div>
 
@@ -174,9 +238,24 @@
         <div class="stat-card"><div class="label">Followers</div><div class="value" id="stat-followers">...</div></div>
       </div>
 
-      <div class="games-section" id="games-section">
-        <div class="section-title">Games nổi bật</div>
-        <div id="games-list"></div>
+      <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab('games')">🎮 Games</button>
+        <button class="tab-btn" onclick="switchTab('places')">🗺️ Maps</button>
+        <button class="tab-btn" onclick="switchTab('badges')">🏅 Badges</button>
+        <button class="tab-btn" onclick="switchTab('inventory')">🎒 Inventory</button>
+      </div>
+
+      <div class="tab-content active" id="tab-games">
+        <div id="games-list"><div class="empty-note">Đang tải...</div></div>
+      </div>
+      <div class="tab-content" id="tab-places">
+        <div id="places-list"><div class="empty-note">Đang tải...</div></div>
+      </div>
+      <div class="tab-content" id="tab-badges">
+        <div id="badges-list"><div class="empty-note">Đang tải...</div></div>
+      </div>
+      <div class="tab-content" id="tab-inventory">
+        <div id="inventory-list"><div class="empty-note">Đang tải...</div></div>
       </div>
 
       <a class="profile-btn" id="profile-link" href="#" target="_blank">Xem profile trên Roblox ↗</a>
@@ -189,31 +268,95 @@
   </div>
 
   <script>
-    // ⚠️ Đổi thành URL Worker của bạn nếu cần
     const WORKER = "https://gentle-hall-e65f.atnoob3034.workers.dev";
+    const COOLDOWN_MS = 2000;
+    let lastSearch = 0;
+    let cooldownTimer = null;
 
+    // ── HTTP helpers ──────────────────────────────────────
     async function get(url) {
       const res = await fetch(`${WORKER}?url=${encodeURIComponent(url)}`);
       if (!res.ok) throw new Error("HTTP " + res.status);
       return res.json();
     }
+    async function post(url, body) {
+      const res = await fetch(`${WORKER}?url=${encodeURIComponent(url)}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      if (!res.ok) throw new Error("HTTP " + res.status);
+      return res.json();
+    }
 
+    function fmt(n) { return typeof n === 'number' ? n.toLocaleString('vi-VN') : '—'; }
+    function esc(s) {
+      return String(s)
+        .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+        .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    // ── Cooldown ──────────────────────────────────────────
+    function startCooldown() {
+      const wrap = document.getElementById('cooldown-wrap');
+      const bar  = document.getElementById('cooldown-bar');
+      const btn  = document.getElementById('search-btn');
+      wrap.style.display = 'block';
+      bar.style.transition = 'none';
+      bar.style.width = '100%';
+      bar.getBoundingClientRect(); // force reflow
+      bar.style.transition = `width ${COOLDOWN_MS}ms linear`;
+      bar.style.width = '0%';
+      btn.disabled = true;
+      btn.textContent = 'Chờ 2s...';
+      clearTimeout(cooldownTimer);
+      cooldownTimer = setTimeout(() => {
+        btn.disabled = false;
+        btn.textContent = 'Tìm kiếm';
+        wrap.style.display = 'none';
+      }, COOLDOWN_MS);
+    }
+
+    // ── Tabs ──────────────────────────────────────────────
+    const TAB_NAMES = ['games','places','badges','inventory'];
+    function switchTab(name) {
+      document.querySelectorAll('.tab-btn').forEach((b, i) =>
+        b.classList.toggle('active', TAB_NAMES[i] === name));
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+      document.getElementById('tab-' + name).classList.add('active');
+    }
+
+    // ── Search ────────────────────────────────────────────
     async function searchPlayer() {
+      const now = Date.now();
+      if (now - lastSearch < COOLDOWN_MS) {
+        const wait = Math.ceil((COOLDOWN_MS - (now - lastSearch)) / 1000);
+        setError(`Vui lòng chờ ${wait}s trước khi tìm tiếp.`);
+        return;
+      }
+
       const input = document.getElementById('search-input').value.trim();
       if (!input) return;
-      setError(''); setLoading(true);
+
+      lastSearch = now;
+      startCooldown();
+      setError('');
+      setLoading(true);
       document.getElementById('result-card').style.display = 'none';
-      document.getElementById('games-section').style.display = 'none';
+      resetTabs();
 
       try {
-        let userId = null;
+        let userId;
+
         if (/^\d+$/.test(input)) {
           userId = input;
         } else {
-          const data = await get(`https://users.roblox.com/v1/users/search?keyword=${encodeURIComponent(input)}&limit=10`);
-          const match = data?.data?.find(u => u.name.toLowerCase() === input.toLowerCase());
-          userId = match ? match.id : data?.data?.[0]?.id;
-          if (!userId) { setError('Không tìm thấy username "' + input + '". Thử nhập User ID.'); return; }
+          // ✅ POST /v1/usernames/users — ít bị rate limit hơn GET /v1/users/search
+          const data = await post('https://users.roblox.com/v1/usernames/users',
+            { usernames: [input], excludeBannedUsers: false });
+          const match = data?.data?.[0];
+          if (!match) { setError(`Không tìm thấy username "${esc(input)}". Thử nhập User ID.`); return; }
+          userId = match.id;
         }
 
         const user = await get(`https://users.roblox.com/v1/users/${userId}`);
@@ -225,43 +368,36 @@
           avatarUrl = av?.data?.[0]?.imageUrl;
         } catch {}
 
-        showResult(user, avatarUrl);
+        showProfile(user, avatarUrl);
 
+        // Tải song song
         Promise.allSettled([
           get(`https://friends.roblox.com/v1/users/${userId}/friends/count`),
           get(`https://friends.roblox.com/v1/users/${userId}/followings/count`),
           get(`https://friends.roblox.com/v1/users/${userId}/followers/count`),
-          get(`https://www.roblox.com/users/profile/playergames-json?userId=${userId}`)
-        ]).then(([friends, following, followers, games]) => {
-          const fmt = n => typeof n === 'number' ? n.toLocaleString('vi-VN') : '—';
-          document.getElementById('stat-friends').textContent = fmt(friends.value?.count);
+          get(`https://www.roblox.com/users/profile/playergames-json?userId=${userId}`),
+          get(`https://inventory.roblox.com/v1/users/${userId}/places/inventory?cursor=&itemsPerPage=10&placesTab=Created`),
+          get(`https://badges.roblox.com/v1/users/${userId}/badges?limit=24&sortOrder=Desc`),
+          get(`https://inventory.roblox.com/v1/users/${userId}/assets/collectibles?limit=24&sortOrder=Desc`),
+        ]).then(([friends, following, followers, games, places, badges, inventory]) => {
+          document.getElementById('stat-friends').textContent   = fmt(friends.value?.count);
           document.getElementById('stat-following').textContent = fmt(following.value?.count);
           document.getElementById('stat-followers').textContent = fmt(followers.value?.count);
-
-          if (games.status === 'fulfilled') {
-            const list = games.value?.Games;
-            if (list?.length) {
-              const el = document.getElementById('games-list');
-              el.innerHTML = '';
-              list.slice(0, 5).forEach(g => {
-                const item = document.createElement('div');
-                item.className = 'game-item';
-                item.innerHTML = `<span class="game-name">${g.Name}</span><span class="game-plays">${(g.Plays||0).toLocaleString('vi-VN')} lượt</span>`;
-                el.appendChild(item);
-              });
-              document.getElementById('games-section').style.display = 'block';
-            }
-          }
+          renderGames(games);
+          renderPlaces(places);
+          renderBadges(badges);
+          renderInventory(inventory);
         });
 
-      } catch(e) {
+      } catch (e) {
         setError('Lỗi kết nối: ' + e.message);
       } finally {
         setLoading(false);
       }
     }
 
-    function showResult(user, avatarUrl) {
+    // ── Render helpers ────────────────────────────────────
+    function showProfile(user, avatarUrl) {
       document.getElementById('display-name').textContent = user.displayName || user.name;
       document.getElementById('username-line').textContent = '@' + user.name + ' · ID: ' + user.id;
       document.getElementById('stat-id').textContent = '#' + user.id;
@@ -269,44 +405,114 @@
       const bio = user.description?.trim();
       const bioEl = document.getElementById('bio-text');
       if (bio) { bioEl.textContent = bio; bioEl.style.display = 'block'; }
-      else { bioEl.style.display = 'none'; }
+      else bioEl.style.display = 'none';
 
       document.getElementById('stat-joined').textContent = user.created
         ? new Date(user.created).toLocaleDateString('vi-VN', {year:'numeric',month:'short',day:'numeric'}) : '—';
 
       const statusEl = document.getElementById('stat-status');
-      statusEl.textContent = user.isBanned ? 'Bị ban' : 'OK';
+      statusEl.textContent = user.isBanned ? 'Bị ban' : 'Bình thường';
       statusEl.style.color = user.isBanned ? '#ff6060' : '#60d060';
 
-      const badges = document.getElementById('badges');
-      badges.innerHTML = '';
-      if (user.hasVerifiedBadge) badges.innerHTML += `<span class="badge badge-verified">Đã xác thực</span>`;
-      badges.innerHTML += user.isBanned
-        ? `<span class="badge badge-banned">Bị ban</span>`
-        : `<span class="badge badge-active">Hoạt động</span>`;
+      const sb = document.getElementById('status-badges');
+      sb.innerHTML = '';
+      if (user.hasVerifiedBadge) sb.innerHTML += `<span class="badge badge-verified">✓ Đã xác thực</span>`;
+      sb.innerHTML += user.isBanned
+        ? `<span class="badge badge-banned">🔴 Bị ban</span>`
+        : `<span class="badge badge-active">🟢 Hoạt động</span>`;
 
       const initial = (user.name||'?')[0].toUpperCase();
-      const avatarWrap = document.getElementById('avatar-wrap');
+      const aw = document.getElementById('avatar-wrap');
       if (avatarUrl) {
-        avatarWrap.innerHTML = `<img src="${avatarUrl}" alt="avatar" onerror="this.parentElement.textContent='${initial}'" />`;
-      } else { avatarWrap.textContent = initial; }
+        aw.innerHTML = `<img src="${esc(avatarUrl)}" alt="avatar" onerror="this.parentElement.textContent='${esc(initial)}'" />`;
+      } else aw.textContent = initial;
 
       document.getElementById('profile-link').href = `https://www.roblox.com/users/${user.id}/profile`;
-      document.getElementById('stat-friends').textContent = '...';
-      document.getElementById('stat-following').textContent = '...';
-      document.getElementById('stat-followers').textContent = '...';
+      ['friends','following','followers'].forEach(k => document.getElementById('stat-'+k).textContent = '...');
       document.getElementById('result-card').style.display = 'block';
     }
 
+    function renderGames(r) {
+      const el = document.getElementById('games-list');
+      if (r.status !== 'fulfilled') { el.innerHTML = '<div class="empty-note">Không thể tải games.</div>'; return; }
+      const list = r.value?.Games;
+      if (!list?.length) { el.innerHTML = '<div class="empty-note">Chưa có games công khai.</div>'; return; }
+      el.innerHTML = list.slice(0,8).map(g => `
+        <div class="list-item">
+          <div class="list-item-info">
+            <div class="list-item-name">${esc(g.Name)}</div>
+            <div class="list-item-sub">👍 ${fmt(g.TotalUpVotes)} · ❤️ ${fmt(g.Favorites)}</div>
+          </div>
+          <div class="list-item-right">${fmt(g.Plays)} lượt</div>
+        </div>`).join('');
+    }
+
+    function renderPlaces(r) {
+      const el = document.getElementById('places-list');
+      if (r.status !== 'fulfilled') { el.innerHTML = '<div class="empty-note">Không thể tải maps.</div>'; return; }
+      const list = r.value?.data;
+      if (!list?.length) { el.innerHTML = '<div class="empty-note">Chưa tạo map nào hoặc inventory riêng tư.</div>'; return; }
+      el.innerHTML = list.slice(0,10).map(p => `
+        <div class="list-item">
+          <div class="list-item-info">
+            <div class="list-item-name">${esc(p.name || 'Không tên')}</div>
+            <div class="list-item-sub">Place ID: ${p.placeId || p.id || '—'}</div>
+          </div>
+          <div class="list-item-right">
+            <a href="https://www.roblox.com/games/${p.placeId||p.id}" target="_blank"
+               style="color:#e8573e;text-decoration:none">Mở ↗</a>
+          </div>
+        </div>`).join('');
+    }
+
+    function renderBadges(r) {
+      const el = document.getElementById('badges-list');
+      if (r.status !== 'fulfilled') { el.innerHTML = '<div class="empty-note">Không thể tải badges.</div>'; return; }
+      const list = r.value?.data;
+      if (!list?.length) { el.innerHTML = '<div class="empty-note">Chưa có badge nào.</div>'; return; }
+      el.innerHTML =
+        `<div class="badge-grid">` +
+        list.map(b => `
+          <div class="badge-item" title="${esc(b.name)}">
+            <img src="${esc(b.displayIconImageUrl||'')}" alt="${esc(b.name)}" loading="lazy"
+                 onerror="this.style.opacity='0'" />
+            <div class="badge-name">${esc(b.name)}</div>
+          </div>`).join('') +
+        `</div><div class="tab-footer">Hiển thị ${list.length} badge gần nhất</div>`;
+    }
+
+    function renderInventory(r) {
+      const el = document.getElementById('inventory-list');
+      if (r.status !== 'fulfilled') {
+        el.innerHTML = '<div class="empty-note">Inventory riêng tư hoặc không thể tải.</div>';
+        return;
+      }
+      const list = r.value?.data;
+      if (!list?.length) { el.innerHTML = '<div class="empty-note">Không có collectibles hoặc inventory riêng tư.</div>'; return; }
+      el.innerHTML =
+        `<div class="inv-grid">` +
+        list.map(item => `
+          <div class="inv-item" title="${esc(item.name)}">
+            <img src="https://www.roblox.com/Thumbs/Asset.ashx?assetId=${item.assetId}&x=60&y=60"
+                 alt="${esc(item.name)}" loading="lazy" onerror="this.style.display='none'" />
+            <div class="inv-name">${esc(item.name)}</div>
+          </div>`).join('') +
+        `</div><div class="tab-footer">Hiển thị ${list.length} collectibles</div>`;
+    }
+
+    function resetTabs() {
+      ['games','places','badges','inventory'].forEach(t =>
+        document.getElementById(t+'-list').innerHTML = '<div class="empty-note">Đang tải...</div>');
+      switchTab('games');
+    }
     function setError(msg) {
       const el = document.getElementById('error-msg');
       el.textContent = msg; el.style.display = msg ? 'block' : 'none';
     }
     function setLoading(v) {
       document.getElementById('loading').style.display = v ? 'block' : 'none';
-      document.getElementById('search-btn').disabled = v;
-      document.getElementById('search-btn').textContent = v ? 'Đang tìm...' : 'Tìm kiếm';
     }
+
     document.getElementById('search-input').addEventListener('keydown', e => {
       if (e.key === 'Enter') searchPlayer();
     });
